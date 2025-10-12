@@ -1,11 +1,13 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Briefcase, FileText, Target, Users, Mail, Phone, MapPin } from "lucide-react";
+import { ReviewsSection } from "@/components/ReviewsSection";
+import { Briefcase, FileText, Target, Users, Mail, MapPin } from "lucide-react";
 
 const Index = () => {
   const { toast } = useToast();
@@ -125,7 +127,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-5xl font-bold text-primary mb-2">500+</div>
+              <div className="text-5xl font-bold text-primary mb-2">100+</div>
               <div className="text-xl text-muted-foreground">Successful Placements</div>
             </div>
             <div>
@@ -133,15 +135,18 @@ const Index = () => {
               <div className="text-xl text-muted-foreground">Interview Success Rate</div>
             </div>
             <div>
-              <div className="text-5xl font-bold text-primary mb-2">50+</div>
+              <div className="text-5xl font-bold text-primary mb-2">20+</div>
               <div className="text-xl text-muted-foreground">Partner Companies</div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Reviews Section */}
+      <ReviewsSection />
+
       {/* Contact Section */}
-      <section id="contact" className="py-20 bg-muted/30">
+      <section id="contact" className="py-20">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">Get In Touch</h2>
@@ -230,6 +235,9 @@ const Index = () => {
       <footer className="py-8 bg-card border-t">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
           <p>&copy; 2025 Phoenix Solutions. All rights reserved.</p>
+          <Link to="/auth" className="text-xs text-muted-foreground/50 hover:text-muted-foreground">
+            Admin
+          </Link>
         </div>
       </footer>
     </div>
