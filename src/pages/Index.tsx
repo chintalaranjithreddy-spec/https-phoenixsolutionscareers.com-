@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewsSection } from "@/components/ReviewsSection";
 import { Briefcase, FileText, Target, Users, Mail, MapPin } from "lucide-react";
+import heroBackground from "@/assets/hero-background.jpg";
+import phoenixPattern from "@/assets/phoenix-pattern.jpg";
 
 const Index = () => {
   const { toast } = useToast();
@@ -73,23 +75,28 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-secondary/10 pt-20 pb-32">
-        <div className="container mx-auto px-4">
+      <section className="relative overflow-hidden pt-20 pb-32">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${heroBackground})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-secondary/80" />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
             <div className="mb-8 relative">
-              <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 relative bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <div className="absolute inset-0 bg-white/10 blur-3xl rounded-full" />
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 relative text-white drop-shadow-lg">
                 Phoenix Solutions
               </h1>
             </div>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl">
+            <p className="text-xl md:text-2xl text-white/95 mb-8 max-w-2xl drop-shadow-md">
               Rise from the ashes of job hunting. We help job seekers across the USA land positions at top companies.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="text-lg px-8" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
+              <Button size="lg" className="text-lg px-8 bg-white text-primary hover:bg-white/90 shadow-xl" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
                 Get Started
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8">
+              <Button size="lg" variant="outline" className="text-lg px-8 border-white text-white hover:bg-white/20 shadow-xl">
                 Learn More
               </Button>
             </div>
@@ -98,8 +105,12 @@ const Index = () => {
       </section>
 
       {/* Services Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
+      <section className="py-20 bg-muted/30 relative overflow-hidden">
+        <div 
+          className="absolute inset-0 opacity-5"
+          style={{ backgroundImage: `url(${phoenixPattern})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+        />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Services</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
