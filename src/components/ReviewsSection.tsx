@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Star } from "lucide-react";
+import { z } from "zod";
 
 interface Review {
   id: string;
@@ -33,9 +34,10 @@ export const ReviewsSection = () => {
   }, []);
 
   const fetchReviews = async () => {
+    // Only select necessary columns, excluding email for privacy
     const { data, error } = await supabase
       .from("reviews")
-      .select("*")
+      .select("id, name, company, rating, review_text, created_at")
       .eq("is_approved", true)
       .order("created_at", { ascending: false });
 
@@ -44,12 +46,47 @@ export const ReviewsSection = () => {
     }
   };
 
+  const reviewSchema = z.object({
+    name: z.string()
+      .trim()
+      .min(1, "Name is required")
+      .max(100, "Name must be less than 100 characters"),
+    email: z.string()
+      .trim()
+      .email("Invalid email address")
+      .max(255, "Email must be less than 255 characters"),
+    company: z.string()
+      .trim()
+      .max(100, "Company name must be less than 100 characters")
+      .optional(),
+    rating: z.number()
+      .int()
+      .min(1, "Rating must be between 1 and 5")
+      .max(5, "Rating must be between 1 and 5"),
+    review_text: z.string()
+      .trim()
+      .min(1, "Review is required")
+      .max(1000, "Review must be less than 1000 characters"),
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from("reviews").insert([formData]);
+      // Validate input
+      const validatedData = reviewSchema.parse(formData);
+
+      // Ensure required fields are present for database insert
+      const insertData = {
+        name: validatedData.name,
+        email: validatedData.email,
+        company: validatedData.company || null,
+        rating: validatedData.rating,
+        review_text: validatedData.review_text,
+      };
+
+      const { error } = await supabase.from("reviews").insert([insertData]);
 
       if (error) throw error;
 
@@ -66,11 +103,19 @@ export const ReviewsSection = () => {
         review_text: "",
       });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to submit review. Please try again.",
-        variant: "destructive",
-      });
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to submit review. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }

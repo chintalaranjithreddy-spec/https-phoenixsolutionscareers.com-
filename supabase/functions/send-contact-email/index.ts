@@ -16,15 +16,78 @@ interface ContactEmailRequest {
   message: string;
 }
 
+// Rate limiting: Store IP addresses with timestamps
+const rateLimitStore = new Map<string, number[]>();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 3; // 3 requests per minute
+
+function getRateLimitKey(req: Request): string {
+  // Use client IP for rate limiting
+  const forwarded = req.headers.get("x-forwarded-for");
+  return forwarded ? forwarded.split(",")[0].trim() : "unknown";
+}
+
+function checkRateLimit(key: string): boolean {
+  const now = Date.now();
+  const requests = rateLimitStore.get(key) || [];
+  
+  // Remove old requests outside the window
+  const recentRequests = requests.filter(time => now - time < RATE_LIMIT_WINDOW);
+  
+  if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
+    return false;
+  }
+  
+  // Add current request
+  recentRequests.push(now);
+  rateLimitStore.set(key, recentRequests);
+  
+  return true;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Check rate limit
+    const rateLimitKey = getRateLimitKey(req);
+    if (!checkRateLimit(rateLimitKey)) {
+      console.warn("Rate limit exceeded for key:", rateLimitKey.substring(0, 10) + "...");
+      return new Response(
+        JSON.stringify({ error: "Too many requests. Please try again later." }),
+        {
+          status: 429,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
     const { name, email, phone, message }: ContactEmailRequest = await req.json();
 
-    console.log("Sending contact email from:", email);
+    // Basic server-side validation
+    if (!name || !email || !message) {
+      return new Response(
+        JSON.stringify({ error: "Missing required fields" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    if (name.length > 100 || email.length > 255 || message.length > 2000) {
+      return new Response(
+        JSON.stringify({ error: "Input exceeds maximum length" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    console.log("Processing contact form submission");
 
     // Send email to Phoenix Solutions
     const emailToCompany = await resend.emails.send({
@@ -56,7 +119,12 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Emails sent successfully:", { emailToCompany, emailToCandidate });
+    if (emailToCompany.error || emailToCandidate.error) {
+      console.error("Email sending failed");
+      throw new Error("Failed to send email");
+    }
+
+    console.log("Emails sent successfully");
 
     return new Response(
       JSON.stringify({ success: true }),
@@ -69,9 +137,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Error in send-contact-email function:", error);
+    console.error("Error in send-contact-email function:", error.message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Failed to send message" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

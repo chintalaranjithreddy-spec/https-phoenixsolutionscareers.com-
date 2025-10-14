@@ -11,6 +11,7 @@ import { Briefcase, FileText, Target, Users, Mail, MapPin } from "lucide-react";
 import heroBackground from "@/assets/hero-background.jpg";
 import phoenixPattern from "@/assets/phoenix-pattern.jpg";
 import phoenixLogo from "@/assets/phoenix-logo.png";
+import { z } from "zod";
 
 const Index = () => {
   const { toast } = useToast();
@@ -22,13 +23,36 @@ const Index = () => {
     message: "",
   });
 
+  const contactSchema = z.object({
+    name: z.string()
+      .trim()
+      .min(1, "Name is required")
+      .max(100, "Name must be less than 100 characters"),
+    email: z.string()
+      .trim()
+      .email("Invalid email address")
+      .max(255, "Email must be less than 255 characters"),
+    phone: z.string()
+      .trim()
+      .max(20, "Phone number must be less than 20 characters")
+      .optional()
+      .or(z.literal("")),
+    message: z.string()
+      .trim()
+      .min(1, "Message is required")
+      .max(2000, "Message must be less than 2000 characters"),
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
+      // Validate input
+      const validatedData = contactSchema.parse(formData);
+
       const { error } = await supabase.functions.invoke("send-contact-email", {
-        body: formData,
+        body: validatedData,
       });
 
       if (error) throw error;
@@ -40,11 +64,19 @@ const Index = () => {
 
       setFormData({ name: "", email: "", phone: "", message: "" });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive",
-      });
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to send message. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }

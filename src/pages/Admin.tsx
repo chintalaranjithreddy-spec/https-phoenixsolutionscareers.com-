@@ -36,8 +36,11 @@ const Admin = () => {
   });
 
   useEffect(() => {
+    let isMounted = true;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (!isMounted) return;
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -54,6 +57,7 @@ const Admin = () => {
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -64,7 +68,10 @@ const Admin = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const checkAdminStatus = async (userId: string) => {
@@ -163,15 +170,20 @@ const Admin = () => {
     navigate("/");
   };
 
+  // Show loading state while checking authentication and admin status
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p>Loading...</p>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Verifying access...</p>
+        </div>
       </div>
     );
   }
 
-  if (!isAdmin) {
+  // Don't render admin content if not authorized
+  if (!isAdmin || !user) {
     return null;
   }
 
