@@ -10,6 +10,7 @@ import { ReviewsSection } from "@/components/ReviewsSection";
 import { Briefcase, FileText, Target, Users, Mail, MapPin } from "lucide-react";
 import heroBackground from "@/assets/hero-background.jpg";
 import phoenixPattern from "@/assets/phoenix-pattern.jpg";
+import phoenixLogo from "@/assets/phoenix-logo.png";
 
 const Index = () => {
   const { toast } = useToast();
@@ -84,7 +85,11 @@ const Index = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
             <div className="mb-8 relative">
-              <div className="absolute inset-0 bg-white/10 blur-3xl rounded-full" />
+              <img 
+                src={phoenixLogo} 
+                alt="Phoenix Solutions Logo" 
+                className="w-32 h-32 md:w-40 md:h-40 mb-6 mx-auto drop-shadow-2xl"
+              />
               <h1 className="text-5xl md:text-7xl font-bold mb-6 relative text-white drop-shadow-lg">
                 Phoenix Solutions
               </h1>
