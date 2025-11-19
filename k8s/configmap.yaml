@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: phoenix-config
+  namespace: phoenix-app
+data:
+  # Supabase configuration
+  VITE_SUPABASE_URL: "https://klqzlepxqmorjsdobijj.supabase.co"
+  VITE_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtscXpsZXB4cW1vcmpzZG9iaWpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyODE0MjIsImV4cCI6MjA3NTg1NzQyMn0.lbt6lzBypkc411OD_YQHZ8Kk5X_FY-xEA-_oynQoovk"
+  VITE_SUPABASE_PROJECT_ID: "klqzlepxqmorjsdobijj"

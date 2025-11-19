@@ -1,0 +1,23 @@
+# Docker Compose file for local development and testing
+version: '3.8'
+
+services:
+  # Frontend application
+  phoenix-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_PUBLISHABLE_KEY=${VITE_SUPABASE_PUBLISHABLE_KEY}
+      - VITE_SUPABASE_PROJECT_ID=${VITE_SUPABASE_PROJECT_ID}
+    restart: unless-stopped
+    container_name: phoenix-frontend
+    networks:
+      - phoenix-network
+
+networks:
+  phoenix-network:
+    driver: bridge

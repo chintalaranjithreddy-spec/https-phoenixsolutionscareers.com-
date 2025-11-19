@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: phoenix-app
+  labels:
+    name: phoenix-app
+    app: phoenix-reviews
