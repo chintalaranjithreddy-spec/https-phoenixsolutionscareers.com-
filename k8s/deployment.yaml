@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phoenix-app
+  namespace: phoenix-app
+  labels:
+    app: phoenix-reviews
+    version: v1
+spec:
+  # Number of pod replicas
+  replicas: 3
+  
+  # Selector to identify pods
+  selector:
+    matchLabels:
+      app: phoenix-reviews
+  
+  # Rolling update strategy
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  
+  # Pod template
+  template:
+    metadata:
+      labels:
+        app: phoenix-reviews
+        version: v1
+    spec:
+      containers:
+      - name: phoenix-app
+        # You'll replace this with your actual Docker image
+        image: YOUR_AWS_ACCOUNT_ID.dkr.ecr.YOUR_REGION.amazonaws.com/phoenix-app:latest
+        imagePullPolicy: Always
+        
+        # Container port
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        
+        # Environment variables from ConfigMap
+        envFrom:
+        - configMapRef:
+            name: phoenix-config
+        
+        # Resource limits and requests
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      
+      # Restart policy
+      restartPolicy: Always
